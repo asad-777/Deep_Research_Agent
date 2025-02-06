@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Scientific Research Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prismjs/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prismjs/1.29.0/components/prism-python.min.js"></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/prismjs/1.29.0/themes/prism-tomorrow.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      @font-face {
+        font-family: "JetBrains Mono";
+        src: url("https://cdnjs.cloudflare.com/ajax/libs/jetbrains-mono/1.0.6/web/woff2/JetBrainsMono-Regular.woff2")
+          format("woff2");
+      }
+
+      code {
+        font-family: "JetBrains Mono", monospace;
+      }
+
+      .message-appear {
+        animation: messageAppear 0.3s ease-out forwards;
+      }
+
+      @keyframes messageAppear {
+        from {
+          opacity: 0;
+          transform: translateY(5px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: #1a1a1a;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #404040;
+        border-radius: 4px;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #4a4a4a;
+      }
+
+      .system-status {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.75rem;
+      }
+
+      .grid-bg {
+        background-image: radial-gradient(circle, #333333 1px, transparent 1px);
+        background-size: 30px 30px;
+        background-position: 0 0;
+        opacity: 0.1;
+      }
+
+      .header-highlight {
+        background: linear-gradient(90deg, #1a1a1a 0%, transparent 100%);
+      }
+
+      .message-hover {
+        transition: all 0.2s ease;
+      }
+
+      .message-hover:hover {
+        transform: translateX(2px);
+        border-color: #404040;
+      }
+
+      .input-container {
+        background: linear-gradient(
+          180deg,
+          rgba(24, 24, 27, 0) 0%,
+          rgba(24, 24, 27, 0.9) 100%
+        );
+      }
+    </style>
+  </head>
+  <body class="bg-black text-gray-200 min-h-screen flex flex-col relative">
+    <div class="grid-bg fixed inset-0 pointer-events-none"></div>
+
+    <!-- Header -->
+    <header
+      class="bg-gradient-to-b from-zinc-900 to-black border-b border-zinc-800 p-4 relative z-10"
+    >
+      <div class="max-w-screen-xl mx-auto flex justify-between items-center">
+        <div class="flex items-center space-x-6">
+          <div>
+            <h1 class="text-xl font-mono font-bold text-white">
+              Scientific Research Assistant
+            </h1>
+            <div class="flex items-center space-x-4 mt-1">
+              <span class="text-xs text-zinc-500 font-mono">v1.0.2</span>
+              <span class="text-xs text-zinc-500 font-mono">|</span>
+              <span class="text-xs text-zinc-500 font-mono"
+                >Model: Gemini-1.5-Flash</span
+              >
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center space-x-6">
+          <div class="system-status text-zinc-600 flex items-center space-x-2">
+            <div class="flex flex-col items-end">
+              <span class="text-xs text-zinc-400">System Status</span>
+              <span class="text-green-500 flex items-center">
+                <span class="h-2 w-2 rounded-full bg-green-500 mr-2"></span>
+                Operational
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main
+      class="flex-1 flex flex-col max-w-screen-xl w-full mx-auto p-4 relative z-10"
+    >
+      <!-- Messages Container -->
+      <div
+        id="messages"
+        class="flex-1 max-h-[380px] overflow-y-auto overflow-x-auto space-y-4 mb-4 custom-scrollbar pb-6"
+      ></div>
+
+      <!-- Input Section -->
+      <div
+        class="fixed-bottom input-container border border-zinc-800 rounded-lg backdrop-blur-sm"
+      >
+        <form id="queryForm" class="flex items-center space-x-4 p-4">
+          <div class="flex-grow relative">
+            <textarea
+              id="query"
+              rows="3"
+              class="w-full bg-black/30 border border-zinc-800 rounded-lg p-4 text-gray-300 placeholder-zinc-600 font-mono text-sm resize-none focus:ring-1 focus:ring-zinc-700 focus:border-zinc-700 transition-all custom-scrollbar"
+              placeholder="Enter your research query..."
+            ></textarea>
+          </div>
+          <button
+            type="submit"
+            class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-6 py-3 rounded-lg font-mono text-sm transition-all duration-200 hover:shadow-lg hover:shadow-zinc-900/50 flex items-center space-x-2"
+          >
+            <span>Execute Query</span>
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 7l5 5m0 0l-5 5m5-5H6"
+              />
+            </svg>
+          </button>
+        </form>
+      </div>
+    </main>
+
+    <script>
+      const form = document.getElementById("queryForm");
+      const messages = document.getElementById("messages");
+
+      function createMessageElement(content, type = "assistant") {
+        const messageDiv = document.createElement("div");
+        messageDiv.className =
+          "message-appear bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 message-hover";
+
+        const innerDiv = document.createElement("div");
+        innerDiv.className = "flex items-start space-x-3";
+
+        const avatar = document.createElement("div");
+        avatar.className =
+          "w-6 h-6 rounded-lg bg-gradient-to-b flex items-center justify-center text-xs font-mono";
+
+        if (type === "user") {
+          avatar.className += " from-zinc-600 to-zinc-700";
+          avatar.textContent = "U";
+        } else if (type === "S") {
+          avatar.className += " from-zinc-800 to-zinc-900";
+          avatar.textContent = "S";
+        } else {
+          avatar.className += " from-zinc-700 to-zinc-800";
+          avatar.textContent = "S";
+        }
+
+        const contentDiv = document.createElement("div");
+        contentDiv.className = "flex-1 prose prose-invert max-w-none text-sm";
+        contentDiv.innerHTML = content; // Directly set the innerHTML
+
+        innerDiv.appendChild(avatar);
+        innerDiv.appendChild(contentDiv);
+        messageDiv.appendChild(innerDiv);
+
+        return messageDiv;
+      }
+
+      function addMessage(content, type = "assistant") {
+        // Remove ```html at the beginning and ``` at the end
+        if (content.startsWith("```html")) {
+          content = content.slice(7, -3).trim();
+        } else if (content.startsWith("`````")) {
+          content = content.slice(3, -3).trim();
+        }
+
+        const messageElement = createMessageElement(content, type);
+        messages.appendChild(messageElement);
+        messages.scrollTop = messages.scrollHeight;
+      }
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const queryInput = document.getElementById("query");
+        const query = queryInput.value.trim();
+
+        if (!query) return;
+
+        addMessage(query, "user");
+        queryInput.value = "";
+
+        try {
+          const response = await fetch("/api/chat", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ query: query }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Network response was not ok: " + response.status);
+          }
+
+          const data = await response.json();
+          addMessage(data.response);
+        } catch (error) {
+          addMessage("```error\nError: " + error.message + "\n```");
+          console.error("Error:", error);
+        }
+      });
+
+      const textarea = document.getElementById("query");
+      textarea.addEventListener("input", function () {
+        this.style.height = "auto";
+        this.style.height = this.scrollHeight + "px";
+      });
+    </script>
+  </body>
+</html>

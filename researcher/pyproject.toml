@@ -1,0 +1,25 @@
+[project]
+name = "researcher"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Asad777", email = "muhammadasad7.7.2007@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "beautifysoup4",
+    "flask>=3.1.0",
+    "langchain>=0.3.17",
+    "langchain-community>=0.3.16",
+    "langchain-google-genai>=2.0.9",
+    "litellm>=1.60.2",
+    "python-dotenv>=1.0.1",
+]
+
+[project.scripts]
+ok = "researcher.main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
